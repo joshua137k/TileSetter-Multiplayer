@@ -132,7 +132,10 @@ public class SimpleHttpServer {
 					
 					
 				}else {
-					removeCoordinates(body);
+					if (coordinatesStorage.contains(body)) {
+						removeCoordinates(body);
+						
+					}
 				}
 					
 				
@@ -149,6 +152,7 @@ public class SimpleHttpServer {
 		    synchronized (coordinatesStorage) {
 		        for (int i = 0; i < coordinatesStorage.size(); i++) {
 		            String coordinate = coordinatesStorage.get(i);
+		            
 		            if (coordinate.contains("\"x\":" + x) && coordinate.contains("\"y\":" + y)) {
 		                return i; // Retorna o índice da coordenada encontrada
 		            }

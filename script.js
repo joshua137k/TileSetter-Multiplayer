@@ -132,8 +132,13 @@
         
         const response = await fetch("/coordinates");
         const coordinates = await response.text();
-
-        if (coordinates!="" && coordinates!=cord){
+        if (coordinates==""){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return
+        }
+        if (coordinates!=cord){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            cord=coordinates;
             const coordinatesArray = coordinates.split('p');
             coordinatesArray.forEach(coordinate => {
                 coordinate=JSON.parse(coordinate);
@@ -148,7 +153,8 @@
             });
         }
 
-        cord=coordinates;
+        
+
 
     }
 
