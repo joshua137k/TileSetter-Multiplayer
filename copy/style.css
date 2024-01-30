@@ -13,12 +13,11 @@
 
 /* Estilização dos botões de ferramentas no final da página */
 .tools {
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    z-index: 1000; /* Garante que o div fique acima de outros elementos da página */
 }
 
 .tools button {
@@ -36,12 +35,4 @@
 body {
     margin: 0;
     padding: 0;
-}
-
-#drawingCanvas.draw-mode {
-    cursor: url('pencil.cur'), auto;
-}
-
-#drawingCanvas.erase-mode {
-    cursor: url('eraser.cur'), auto;
 }

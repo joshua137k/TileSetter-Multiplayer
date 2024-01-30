@@ -26,17 +26,20 @@ public class SimpleHttpServer {
 	private static List<String> coordinatesStorage = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
-		HttpServer server = HttpServer.create(new InetSocketAddress(8001),0);
+		HttpServer server = HttpServer.create(new InetSocketAddress(8000),0);
 		
 		server.createContext("/", new MyHandler());
 		server.createContext("/click", new ClickHandler());
 		server.createContext("/coordinates", new CoordinatesHandler());
+		server.createContext("/remove", new ClearHandler());
 
 		server.createContext("/style.css", new StaticFileHandler("style.css"));
 		server.createContext("/script.js", new StaticFileHandler("script.js"));
+		server.createContext("/pencil.cur", new StaticFileHandler("pencil.cur"));
+		server.createContext("/eraser.cur", new StaticFileHandler("eraser.cur"));
 		
 		server.start();
-		System.out.print("Start");
+		System.out.println("Start");
 		
 	}
 	
@@ -75,6 +78,18 @@ public class SimpleHttpServer {
 	    }
 	}
 	
+	static class ClearHandler implements HttpHandler {
+	    @Override
+	    public void handle(HttpExchange t) throws IOException {
+	    	coordinatesStorage.clear();
+
+	        t.getResponseHeaders().set("Content-Type", "application/json");
+	        t.sendResponseHeaders(200, 1);
+
+	    	
+	    }
+	}
+	
 	
 	static class ClickHandler implements HttpHandler{
 		@Override
@@ -103,7 +118,25 @@ public class SimpleHttpServer {
 				
 				InputStream is = t.getRequestBody();
 				String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-				storeCoordinates(body);
+
+				if (body.contains("\"erase\":false,")){
+					body = body.replace("\"erase\":false,", "");
+					String x = body.substring(body.indexOf("\"x\":") + 4, body.indexOf(","));
+			        String y = body.substring(body.indexOf("\"y\":") + 4, body.indexOf(",", body.indexOf("\"y\":")));
+					int a = getCoordinateIndex(x,y);
+					 
+			        if(a!=-1) {
+			        	removeCoordinates(a);
+					}
+					storeCoordinates(body);
+					
+					
+				}else {
+					removeCoordinates(body);
+				}
+					
+				
+				
 				
 				t.sendResponseHeaders(200, 0);
 				t.getResponseBody().close();
@@ -112,8 +145,29 @@ public class SimpleHttpServer {
 			}
 		}
 		
+		private int getCoordinateIndex(String x, String y) {
+		    synchronized (coordinatesStorage) {
+		        for (int i = 0; i < coordinatesStorage.size(); i++) {
+		            String coordinate = coordinatesStorage.get(i);
+		            if (coordinate.contains("\"x\":" + x) && coordinate.contains("\"y\":" + y)) {
+		                return i; // Retorna o índice da coordenada encontrada
+		            }
+		        }
+		    }
+		    return -1; // Retorna -1 se a coordenada não for encontrada
+		}
+		
 		private void storeCoordinates(String n) {
 			coordinatesStorage.add(n);
+		}
+		
+		private void removeCoordinates(String n) {
+			coordinatesStorage.remove(n);
+			
+		}
+		
+		private void removeCoordinates(int n) {
+			coordinatesStorage.remove(n);
 			
 		}
 	}
